@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generatore di QR Code</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #4CAF50;
+      margin: 20px 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .form-container, .qr-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 10px;
+    }
+
+    .form-container form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+    .qr-container {
+      flex: 1;
+      text-align: center;
+    }
+
+    fieldset {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #qrcode canvas {
+      margin-top: 20px;
+    }
+
+    #feedback {
+      margin-top: 10px;
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    #downloadBtn {
+      margin-top: 10px;
+      display: none;
+    }
+	.quick-help {
+    background-color: #eef;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 10px auto 20px auto;
+    max-width: 900px;
+    font-size: 0.9em;
+    color: #333;
+}
+.quick-help h2 {
+    color: #4CAF50;
+    margin-top: 0;
+}
+.quick-help ol {
+    margin: 10px 0 10px 20px;
+}
+.quick-help p {
+    margin: 8px 0;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Generatore di QR Code</h1>
+  <div class="quick-help">
+  <h2>📖 Istruzioni per l'uso</h2>
+  <p>Questo generatore crea QR Code a partire da un URL di destinazione.</p>
+  <ol>
+    <li>Scrivi l'indirizzo web nella casella <strong>URL di Destinazione</strong>.</li>
+    <li>Se presente, imposta le dimensioni del logo (larghezza e altezza in pixel).  
+        <em>Nel modulo base il logo è fisso, nel modulo avanzato puoi scegliere le dimensioni.</em></li>
+    <li>Clicca su <strong>“Genera QR Code”</strong> per creare il codice.</li>
+    <li>Scansiona il QR Code con la fotocamera o un’app dedicata per aprire il link.</li>
+    <li>Nel modulo avanzato puoi anche <strong>scaricare il QR Code</strong> come immagine PNG.</li>
+  </ol>
+  <p><em>Suggerimento:</em> assicurati che il file <strong>logo.png</strong> sia nella stessa cartella del generatore.</p>
+</div>
+
+  <div class="container">
+    <div class="form-container" role="form" aria-labelledby="formTitle">
+      <form id="qrForm">
+        <fieldset>
+         <fieldset>
+  <legend id="formTitle">Imposta l'URL di destinazione</legend>
+  <label for="destination">URL di Destinazione:</label>
+  <input type="url" id="destination" name="destination" placeholder="https://esempio.com" required aria-required="true" />
+
+  <label for="logoWidth">Larghezza logo (px):</label>
+  <input type="number" id="logoWidth" name="logoWidth" value="50" min="10" max="200" aria-describedby="logoInfo"/>
+
+  <label for="logoHeight">Altezza logo (px):</label>
+  <input type="number" id="logoHeight" name="logoHeight" value="50" min="10" max="200" aria-describedby="logoInfo"/>
+  
+  <p id="logoInfo" style="font-size: 0.9em; color: #666;">
+    ℹ️ L'immagine del logo deve trovarsi nella stessa cartella del file HTML.
+  </p>
+
+  <!-- Selezione logo -->
+  <fieldset>
+    <legend>Scegli il logo da usare</legend>
+    <label><input type="radio" name="logoChoice" value="LogoAccademia.png" checked> ACCADEMIA TERESIANA DI SAVONA</label><br/>
+    <label><input type="radio" name="logoChoice" value="hh.webp"> HOLY HEART GOSPEL CHOIR</label><br/>
+    <label><input type="radio" name="logoChoice" value="we.webp"> WAFNA ENSEMBLE</label><br/>
+    <label><input type="radio" name="logoChoice" value="clpgm.webp"> CORO LIRICO POLIFONICO
+GIUSEPPE MANZINO</label>
+  </fieldset>
+
+<!-- Anteprima logo -->
+<div id="logoPreview" style="margin-top:10px;">
+  <p>Logo corrente:</p>
+  <img id="previewImg" src="./logo1.png" alt="Anteprima logo" style="max-width:100px; border:1px solid #ccc; border-radius:4px;"/>
+</div>
+
+  <button type="button" onclick="generateQRCode()">Genera QR Code</button>
+</fieldset>
+
+      </form>
+	  <p>
+	  <a href="Generaqr_base.html">Modulo Base qr code a questo indirizzo</a><br/>
+  <a href="./generatore-qr-generale.html">
+    Esiste un modulo per sperimentare diversi tipi di qr code a questo indirizzo
+  </a>
+</p>
+
+      <div id="feedback" role="status" aria-live="polite"></div>
+    </div>
+    <div class="qr-container" role="main">
+      <div id="qrcode"></div>
+      <button id="downloadBtn" onclick="downloadQRCode()">Scarica QR Code</button>
+    </div>
+  </div>
+  <script src="qrcode.min.js"></script>
+  <script>
+  // Funzione per aggiornare l'anteprima
+  function updatePreview() {
+    const selectedLogo = document.querySelector('input[name="logoChoice"]:checked').value;
+    document.getElementById('previewImg').src = "./" + selectedLogo;
+  }
+
+  // Aggiorna anteprima al cambio radio
+  document.querySelectorAll('input[name="logoChoice"]').forEach(radio => {
+    radio.addEventListener('change', updatePreview);
+  });
+
+  // Aggiorna anteprima al caricamento iniziale
+  window.addEventListener('DOMContentLoaded', updatePreview);
+</script>
+
+  <script>
+    function isValidURL(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+   // Aggiorna anteprima quando si cambia logo
+document.querySelectorAll('input[name="logoChoice"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const previewImg = document.getElementById('previewImg');
+    previewImg.src = "./" + this.value;
+  });
+});
+
+function generateQRCode() {
+  const destination = document.getElementById('destination').value.trim();
+  const logoWidth = parseInt(document.getElementById('logoWidth').value) || 50;
+  const logoHeight = parseInt(document.getElementById('logoHeight').value) || 50;
+  const feedback = document.getElementById('feedback');
+  const qrContainer = document.getElementById('qrcode');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  if (!isValidURL(destination)) {
+    feedback.textContent = "Inserisci un URL valido (es. https://esempio.com)";
+    qrContainer.innerHTML = '';
+    downloadBtn.style.display = 'none';
+    return;
+  }
+
+  // Recupera il logo selezionato
+  const logoChoice = document.querySelector('input[name="logoChoice"]:checked').value;
+
+  const img = new Image();
+  img.src = "./" + logoChoice;
+
+  img.onload = function () {
+    qrContainer.innerHTML = '';
+    feedback.textContent = "QR Code generato con successo!";
+    downloadBtn.style.display = 'block';
+
+    const qrcode = new QRCode(qrContainer, {
+      text: destination,
+      width: 210,
+      height: 210,
+      logo: img.src,
+      logoWidth: logoWidth,
+      logoHeight: logoHeight
+    });
+  };
+}
+
+
+    function downloadQRCode() {
+      const canvas = document.querySelector('#qrcode canvas');
+      if (canvas) {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'qr-code.png';
+        link.click();
+      }
+    }
+  </script>
+</body>
+</html>

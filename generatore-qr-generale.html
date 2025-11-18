@@ -1,0 +1,440 @@
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1200px;
+            gap: 16px;
+        }
+        .form-container {
+            flex: 2;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 220px);
+        }
+        .qr-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        fieldset {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+        }
+        legend {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #qrcode { margin-top: 20px; }
+        #link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        #link a:hover { text-decoration: underline; }
+
+		<!-- #mapChoiceFields label {
+		  display: block;       /* ogni radio+label su una riga */
+		  margin-bottom: 6px;   /* spazio uniforme tra le righe */
+		  font-weight: normal;  /* testo più leggero */
+		} -->
+
+		<!-- #mapChoiceFields input[type="radio"] {
+		  margin-right: 6px;    /* piccolo spazio tra cerchietto e testo */
+		  vertical-align: middle;
+		} -->
+		
+		#mapChoiceFields label {
+		  display: block;
+		  align-items: center;
+		  margin-bottom: 8px;
+		  font-weight: normal;
+		}
+#mapChoiceFields input[type="radio"] {
+	position: absolute
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+        input[type="radio"] {
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        .radio-inline {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 10px;
+            font-weight: normal;
+        }
+
+        .instructions {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+            background-color: #eef;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .quick-help {
+            background-color: #eef;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px auto 20px auto;
+            max-width: 900px;
+            font-size: 0.9em;
+            color: #333;
+        }
+        .quick-help p { margin: 8px 0; }
+        .instructions-box {
+            background-color: #eef;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 0 auto 20px auto;
+            max-width: 900px;
+            font-size: 0.95em;
+            color: #333;
+        }
+        .instructions-box h2 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .instructions-box ul, .instructions-box ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; align-items: stretch; }
+            .form-container, .qr-container {
+                width: 100%;
+                max-height: none;
+                box-shadow: none;
+                padding: 10px;
+            }
+            h1 { font-size: 24px; margin: 10px 0; }
+            .instructions { font-size: 0.95em; }
+            input, select, button, textarea { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Generatore di QR Code Generale</h1>
+
+    <!-- Istruzioni statiche -->
+    <div class="quick-help">
+        <p>ℹ️ Con questo generatore puoi creare QR Code per link, numeri di telefono, email, posizioni, testo libero e reti Wi‑Fi.</p>
+        <p>1. Seleziona il tipo di QR Code dal menu.<br>
+           2. Compila i campi richiesti.<br>
+           3. Premi <strong>“Genera QR Code”</strong> e scansiona il codice con la fotocamera o un’app dedicata.</p>
+        <p><em>Suggerimento:</em> per i link, se non scrivi “http://” o “https://”, verrà aggiunto automaticamente “https://”.</p>
+    </div>
+
+    <div class="instructions-box">
+        <h2>📖 Istruzioni per utilizzare il Generatore di QR Code</h2>
+        <p>Il Generatore di QR Code ti permette di creare facilmente codici QR per diversi tipi di contenuti.</p>
+        <ol>
+            <li><strong>Scegli il tipo di QR Code</strong>:
+                <ul>
+                    <li><b>URL</b> → inserisci un indirizzo web (es. https://www.example.com)</li>
+                    <li><b>Telefono</b> → inserisci un numero (es. +390123456789)</li>
+                    <li><b>Email</b> → inserisci indirizzo, oggetto, corpo, CC e BCC</li>
+                    <li><b>Posizione (Geo)</b> → inserisci coordinate (es. 44.40726,8.93386)</li>
+                    <li><b>Testo libero</b> → scrivi qualsiasi messaggio</li>
+                    <li><b>Wi‑Fi</b> → compila SSID, password e tipo di sicurezza</li>
+                </ul>
+            </li>
+            <li><strong>Inserisci i dati richiesti</strong> nei campi visibili.</li>
+            <li><strong>Clicca su “Genera QR Code”</strong> per creare il codice.</li>
+            <li><strong>Scansiona il QR Code</strong> con la fotocamera o un’app dedicata per aprire il contenuto.</li>
+        </ol>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <form id="qrForm">
+                <fieldset>
+                    <legend>Tipo di QR Code</legend>
+                    <label for="qrType">Scegli il tipo:</label>
+                    <select id="qrType" name="qrType">
+                        <option value="url">URL</option>
+                        <option value="tel">Telefono</option>
+                        <option value="mailto">Email</option>
+                        <option value="geo">Posizione</option>
+                        <option value="text">Testo libero</option>
+                        <option value="wifi">Wi‑Fi</option>
+                    </select>
+
+                    <!-- Messaggio dinamico contestuale -->
+                    <div id="instructions" class="instructions"></div>
+
+                    <!-- Campi generici -->
+                    <div id="defaultFields">
+                        <label for="destination">Contenuto:</label>
+                        <input type="text" id="destination" name="destination" placeholder="Inserisci il contenuto">
+                    </div>
+
+                    <!-- Campi Wi‑Fi -->
+                    <div id="wifiFields" style="display:none;">
+                        <label for="ssid">SSID (nome rete):</label>
+                        <input type="text" id="ssid" placeholder="Es: CasaWiFi">
+
+                        <label for="password">Password:</label>
+                        <input type="text" id="password" placeholder="Es: password123">
+
+                        <label for="security">Sicurezza:</label>
+                        <select id="security">
+                            <option value="WPA">WPA</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Nessuna</option>
+                        </select>
+
+                        <label for="hidden">Rete nascosta:</label>
+                        <select id="hidden">
+                            <option value="false">No</option>
+                            <option value="true">Sì</option>
+                        </select>
+                    </div>
+
+                    <!-- Scelta mappa per GEO -->
+                    <div id="mapChoiceFields" style="display:none; margin-top:10px;">
+                        <fieldset>
+						  <legend>Formato posizione</legend>
+						  <ul style="list-style:none; padding:0; margin:0;">
+							<li><input type="radio" name="mapChoice" value="geo" id="radio-1"><label for="radio-1"> Grezzo (geo:lat,lon)</label></li>
+							<li><label><input type="radio" name="mapChoice" value="gmaps" checked> Google Maps</label></li>
+							<li><label><input type="radio" name="mapChoice" value="osm"> OpenStreetMap</label></li>
+						  </ul>
+						</fieldset>
+
+                    </div>
+
+                    <!-- Campi Email -->
+                   <div id="mapChoiceFields" style="display:none; margin-top:10px;">
+					  <fieldset>
+						<legend>Formato posizione</legend>
+						<label>
+						  <input type="radio" name="mapChoice" value="geo" checked>
+						  Grezzo (geo:lat,lon)
+						</label>
+						<small style="color:#666; font-size:0.85em;">
+						  Formato standard, potrebbe non aprirsi in tutte le app
+						</small>
+
+						<label>
+						  <input type="radio" name="mapChoice" value="gmaps">
+						  Google Maps
+						</label>
+
+						<label>
+						  <input type="radio" name="mapChoice" value="osm">
+						  OpenStreetMap
+						</label>
+					  </fieldset>
+					</div>
+
+
+                    <button type="button" onclick="generateQRCode()">Genera QR Code</button>
+                </fieldset>
+            </form>
+						  <a href="Generaqr.html">Modulo Avanzato per generare qr code con logo a questo indirizzo</a><br/>
+	  <a href="Generaqr_base.html">Modulo Base per generare qr code con logo a questo indirizzo</a><br/>
+        </div>
+ 
+        </div>
+
+        <div class="qr-container">
+            <div id="qrcode"></div>
+            <div id="link"></div>
+        </div>
+    </div>
+
+    <script src="qrcode.min.js"></script>
+    <script>
+        // Messaggi dinamici per il box contestuale
+        const instructionsMap = {
+            url: "Inserisci un indirizzo web. Esempio: https://www.example.com",
+            tel: "Inserisci un numero di telefono. Esempio: +390123456789",
+            mailto: "Compila indirizzo, oggetto, corpo e (opzionale) CC/BCC.",
+            geo: "Inserisci coordinate geografiche. Esempio: 44.40726,8.93386. Scegli come aprire la posizione, il Formato grezzo, potrebbe non aprirsi in tutte le app",
+            text: "Inserisci qualsiasi testo libero. Esempio: Benvenuto al nostro evento!",
+            wifi: "Compila SSID, password e tipo di sicurezza per generare un QR Code Wi‑Fi."
+        };
+
+        // Gestione visibilità sezioni in base al tipo
+        const qrTypeEl = document.getElementById('qrType');
+        const defaultFields = document.getElementById('defaultFields');
+        const wifiFields = document.getElementById('wifiFields');
+        const mapChoiceFields = document.getElementById('mapChoiceFields');
+        const emailFields = document.getElementById('emailFields');
+        const instructionsEl = document.getElementById('instructions');
+
+        function updateUI() {
+            const type = qrTypeEl.value;
+            wifiFields.style.display = (type === 'wifi') ? 'block' : 'none';
+            defaultFields.style.display = (type === 'wifi' || type === 'mailto') ? 'none' : 'block';
+            mapChoiceFields.style.display = (type === 'geo') ? 'block' : 'none';
+            emailFields.style.display = (type === 'mailto') ? 'block' : 'none';
+            instructionsEl.innerText = instructionsMap[type] || '';
+        }
+
+        qrTypeEl.addEventListener('change', updateUI);
+        // Inizializza messaggio e visibilità
+        updateUI();
+
+        function generateQRCode() {
+            const type = qrTypeEl.value;
+            let qrText = "";
+
+            if (type === "wifi") {
+                const ssid = document.getElementById('ssid').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const security = document.getElementById('security').value;
+                const hidden = document.getElementById('hidden').value;
+                if (!ssid) {
+                    alert("Inserisci il nome della rete Wi‑Fi (SSID).");
+                    return;
+                }
+                qrText = `WIFI:T:${security};S:${ssid};P:${password};H:${hidden};;`;
+            } else {
+                // Per tutti gli altri tipi (tranne mailto) usiamo 'destination'
+                const content = document.getElementById('destination').value.trim();
+
+                switch (type) {
+                    case "url":
+                        if (!content) { alert("Inserisci un URL valido."); return; }
+                        qrText = content.startsWith("http") ? content : "https://" + content;
+                        break;
+
+                    case "tel":
+                        if (!content) { alert("Inserisci un numero di telefono valido."); return; }
+                        qrText = "tel:" + content;
+                        break;
+
+                    case "mailto": {
+                        const email = document.getElementById('emailAddress').value.trim();
+                        const subject = encodeURIComponent(document.getElementById('emailSubject').value.trim());
+                        const body = encodeURIComponent(document.getElementById('emailBody').value.trim());
+                        const cc = document.getElementById('emailCc').value.trim();
+                        const bcc = document.getElementById('emailBcc').value.trim();
+
+                        if (!email) {
+                            alert("Inserisci un indirizzo email valido.");
+                            return;
+                        }
+
+                        const params = [];
+                        if (subject) params.push("subject=" + subject);
+                        if (body) params.push("body=" + body);
+                        if (cc) params.push("cc=" + encodeURIComponent(cc));
+                        if (bcc) params.push("bcc=" + encodeURIComponent(bcc));
+
+                        qrText = "mailto:" + email + (params.length ? "?" + params.join("&") : "");
+                        break;
+                    }
+
+                    case "geo": {
+                        if (!content) { alert("Inserisci coordinate valide (es. 44.40726,8.93386)."); return; }
+                        const coords = content.split(",");
+                        if (coords.length === 2) {
+                            const lat = coords[0].trim();
+                            const lon = coords[1].trim();
+                            const mapChoice = document.querySelector('input[name="mapChoice"]:checked').value;
+
+                            if (mapChoice === "geo") {
+                                qrText = `geo:${lat},${lon}`;
+                            } else if (mapChoice === "gmaps") {
+                                qrText = `https://www.google.com/maps?q=${lat},${lon}`;
+                            } else {
+                                qrText = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=15`;
+                            }
+                        } else {
+                            alert("Inserisci coordinate valide (es. 44.40726,8.93386).");
+                            return;
+                        }
+                        break;
+                    }
+
+                    case "text":
+                        if (!content) { alert("Inserisci del testo."); return; }
+                        qrText = content;
+                        break;
+
+                    default:
+                        if (!content) { alert("Inserisci un contenuto valido."); return; }
+                        qrText = content;
+                }
+            }
+
+            const qrcodeContainer = document.getElementById('qrcode');
+            qrcodeContainer.innerHTML = '';
+            new QRCode(qrcodeContainer, {
+                text: qrText,
+                width: 210,
+                height: 210
+            });
+
+            const linkContainer = document.getElementById('link');
+            const showLink = (type === "url" || (type === "geo" && qrText.startsWith("http")));
+            linkContainer.innerHTML = showLink ? `<a href="${qrText}" target="_blank">Apri il link</a>` : '';
+        }
+    </script>
+</body>
+</html>
