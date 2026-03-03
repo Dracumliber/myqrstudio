@@ -235,93 +235,105 @@
 			document.getElementById('emailFields').style.display = (type === 'mailto') ? 'block' : 'none';
         });
 
-        function generateQRCode() {
-            const type = document.getElementById('qrType').value;
-            let qrText = "";
+       function generateQRCode() {
+    const type = document.getElementById('qrType').value;
+    let qrText = "";
 
-            if (type === "wifi") {
-                const ssid = document.getElementById('ssid').value.trim();
-                const password = document.getElementById('password').value.trim();
-                const security = document.getElementById('security').value;
-                const hidden = document.getElementById('hidden').value;
-                if (!ssid) {
-                    alert("Inserisci il nome della rete Wi-Fi (SSID).");
-                    return;
-                }
-                qrText = `WIFI:T:${security};S:${ssid};P:${password};H:${hidden};;`;
-            } else {
+    // Gestione WIFI (OK)
+    if (type === "wifi") {
+        // ... (il codice WIFI resta come è, è corretto)
+        const ssid = document.getElementById('ssid').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const security = document.getElementById('security').value;
+        const hidden = document.getElementById('hidden').value;
+        if (!ssid) {
+            alert("Inserisci il nome della rete Wi-Fi (SSID).");
+            return;
+        }
+        qrText = `WIFI:T:${security};S:${ssid};P:${password};H:${hidden};;`;
+    } else {
+        // Spostiamo qui l'estrazione e il controllo per i campi che lo usano
+        
+        switch (type) {
+            case "url":
+            case "tel":
+            case "geo":
+            case "text":
+                // Questi tipi usano il campo 'destination'
                 const content = document.getElementById('destination').value.trim();
                 if (!content) {
-                    alert("Inserisci un contenuto valido 2.");
+                    alert("Inserisci un contenuto valido."); // Rimosso " 2"
                     return;
                 }
-                switch (type) {
-                    case "url":
-                        qrText = content.startsWith("http") ? content : "https://" + content;
-                        break;
-                    case "tel":
-                        qrText = "tel:" + content;
-                        break;
-                    case "mailto":
-						const email = document.getElementById('emailAddress').value.trim();
-						const subject = encodeURIComponent(document.getElementById('emailSubject').value.trim());
-						const body = encodeURIComponent(document.getElementById('emailBody').value.trim());
-						const cc = document.getElementById('emailCc').value.trim();
-						const bcc = document.getElementById('emailBcc').value.trim();
+                
+                if (type === "url") {
+                    qrText = content.startsWith("http") ? content : "https://" + content;
+                } else if (type === "tel") {
+                    qrText = "tel:" + content;
+                } else if (type === "geo") {
+                    const coords = content.split(",");
+                    if (coords.length === 2) {
+                        const lat = coords[0].trim();
+                        const lon = coords[1].trim();
+                        const mapChoice = document.querySelector('input[name="mapChoice"]:checked').value;
 
-						if (!email) {
-							alert("Inserisci un indirizzo email valido.");
-							return;
-						}
-
-						let params = [];
-						if (subject) params.push("subject=" + subject);
-						if (body) params.push("body=" + body);
-						if (cc) params.push("cc=" + cc);
-						if (bcc) params.push("bcc=" + bcc);
-
-						qrText = "mailto:" + email + (params.length ? "?" + params.join("&") : "");
-						break;
-
-                    case "geo":
-						const coords = content.split(",");
-						if (coords.length === 2) {
-							const lat = coords[0].trim();
-							const lon = coords[1].trim();
-							const mapChoice = document.querySelector('input[name="mapChoice"]:checked').value;
-
-							if (mapChoice === "geo") {
-								qrText = `geo:${lat},${lon}`; // formato grezzo
-							} else if (mapChoice === "gmaps") {
-								// Vecchio: qrText = `https://www.google.com/maps?q=${lat},${lon}`;
-								qrText = `https://maps.google.com/?q=${lat},${lon}`; // Formato corretto e più semplice
-							} else {
-								qrText = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=15`;
-							}
-						} else {
-							alert("Inserisci coordinate valide (es. 44.40726,8.93386).");
-							return;
-						}
-						break;
-                    case "text":
-                        qrText = content;
-                        break;
-                    default:
-                        qrText = content;
+                        if (mapChoice === "geo") {
+                            qrText = `geo:${lat},${lon}`;
+                        } else if (mapChoice === "gmaps") {
+                            // CORREZIONE QUI
+                            qrText = `https://maps.google.com/?q=${lat},${lon}`;
+                        } else {
+                            qrText = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}&zoom=15`;
+                        }
+                    } else {
+                        alert("Inserisci coordinate valide (es. 44.40726,8.93386).");
+                        return;
+                    }
+                } else if (type === "text") {
+                    qrText = content;
                 }
-            }
+                break; // Aggiunto break per i casi con 'destination'
 
-            const qrcodeContainer = document.getElementById('qrcode');
-            qrcodeContainer.innerHTML = '';
-            new QRCode(qrcodeContainer, {
-                text: qrText,
-                width: 210,
-                height: 210
-            });
+            case "mailto":
+                // Gestione EMAIL (OK)
+                const email = document.getElementById('emailAddress').value.trim();
+                const subject = encodeURIComponent(document.getElementById('emailSubject').value.trim());
+                const body = encodeURIComponent(document.getElementById('emailBody').value.trim());
+                const cc = document.getElementById('emailCc').value.trim();
+                const bcc = document.getElementById('emailBcc').value.trim();
 
-            const linkContainer = document.getElementById('link');
-            linkContainer.innerHTML = (type === "url" || type === "geo") ? `<a href="${qrText}" target="_blank">Apri il link</a>` : '';
+                if (!email) {
+                    alert("Inserisci un indirizzo email valido.");
+                    return;
+                }
+
+                let params = [];
+                if (subject) params.push("subject=" + subject);
+                if (body) params.push("body=" + body);
+                if (cc) params.push("cc=" + cc);
+                if (bcc) params.push("bcc=" + bcc);
+
+                qrText = "mailto:" + email + (params.length ? "?" + params.join("&") : "");
+                break; // Aggiunto break
         }
+    }
+    
+    // Generazione del QR code
+    if (qrText) { // Genera solo se qrText è stato impostato
+        const qrcodeContainer = document.getElementById('qrcode');
+        qrcodeContainer.innerHTML = '';
+        new QRCode(qrcodeContainer, {
+            text: qrText,
+            width: 210,
+            height: 210
+        });
+
+        const linkContainer = document.getElementById('link');
+        // Rende il link solo per URL e Mappe (Geo) se usa un formato URL
+        const isUrlLink = type === "url" || (type === "geo" && qrText.startsWith("http"));
+        linkContainer.innerHTML = isUrlLink ? `<a href="${qrText}" target="_blank">Apri il link</a>` : '';
+    }
+}
     </script>
 </body>
 </html>
